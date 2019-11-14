@@ -31,7 +31,7 @@ for flowFile in os.listdir("C:/Users/Devin/Desktop/HonorsProject/Python"):
         i = 0
         time = 0
         while (i<data.size):
-            magnitudeY.append(math.sqrt((float(data[i].imag))**2+(float(data[i].real))**2))
+            magnitudeY.append(math.sqrt((float(data[i].imag))**2+(float(data[i].imag))**2))
             i += 1
             time += float(dic["acq_time"]/dic["acq_points"])
             timeX.append(time)
