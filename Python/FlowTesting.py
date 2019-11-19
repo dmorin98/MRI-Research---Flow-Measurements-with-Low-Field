@@ -14,13 +14,37 @@ from scipy import stats
 starting_point = 27
 peaks = 4
 OscError = 3 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
+diam_tube = 0.0075 #m
+density_fluid = 1010 #kg/m^3
+viscocity = 0.001028 #of fluid (kg/ms)
+
 """
 Below, I will create variables that define the slope and flow velocities of the measurements to be
 used after this loop to gather that data in the files.
 """
+
+
 flowVelocity = [] #Array that stores the flow velocities
 BA_Data = [] #This is the value of B/A (Slope/Intersept)
 OscErrorCCM = 3*15/2
+
+def flowCalc(flow_file):
+    flow_numberCCM = int(flow_file[5:9])
+    area = math.pi*(diam_tube/2)**2
+
+    #return (flow_numberCCM/100)
+    return (flow_numberCCM/(100**3*60*math.pi*(diam_tube/2)**2))
+
+def reynolds(flow_Velocity):
+     Re = []
+     print("flowvel = ", flow_Velocity[7])
+     for i in range(0, len(flow_Velocity), 1):
+         reynolds_number = density_fluid*flowVelocity[i]*diam_tube/viscocity
+         Re.append(reynolds_number)
+         print(reynolds_number)
+         
+     return Re
+
 
 for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-Measurements-with-Low-Field/Python"):
     if flowFile.endswith(".tnt"):
@@ -59,7 +83,7 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
 
 
         #Adding Params into FlowVel and BA_Data
-        flowVelocity.append(int(flowFile[5:9])) #Creating the flowVelocity array
+        flowVelocity.append(flowCalc(flowFile)) #Creating the flowVelocity array
         B_A = -1*p1[0]/p1[1] #Slope over intercept
         BA_Data.append(B_A) #Creating the  BA_Data array
     
@@ -70,11 +94,11 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
         plt.plot(timeX, magnitudeY, label='data')
         plt.xlabel("Time (sec)")
         plt.ylabel("Magnitude (Arbitrary)")
-        plt.title("Flow Velocity of: %s CCM" % flowFile[5:9])
+        plt.title("Flow Velocity of: %s m/s" % flowFile[5:9])
 
         plt.legend()
         plt.figure(1)
-        plt.show()
+        #plt.show()
 
     else:
         print('File found but not .tnt format')
@@ -83,19 +107,44 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
 plt.close()
 
 p2, residuals, _, _, _ = polyfit(flowVelocity,BA_Data,1, full=True)
-plt.plot(flowVelocity, polyval(p2,flowVelocity), label='linear fit')
 
 
-plt.errorbar(flowVelocity, BA_Data,
+"""
+ax1.errorbar(flowVelocity, BA_Data,
             xerr=OscErrorCCM,
             yerr=math.sqrt(residuals/len(BA_Data)),
-            fmt='.k--', label='Actual Data')
+            fmt='.k--', label='Actual Data')"""
 
-plt.xlabel('Flow Velocity (CCM)')
-plt.ylabel('-B/A')
-plt.legend()
-plt.title("2.26MHz at 5 degrees flow measurements (Real&Imag)")
+fig = plt.figure()
+ax1 = fig.add_subplot()
+ax2 = ax1.twinx()
+
+color = 'tab:blue'
+
+ax1.set_xlabel('Flow Velocity (m/s)')
+ax1.set_ylabel('-B/A', color=color)
+ax1.tick_params(axis='y', labelcolor=color)
+
+ax1.plot(flowVelocity, polyval(p2,flowVelocity), label='Linear fit', color = "black")
+ax1.plot(flowVelocity, BA_Data, color=color, label='Flow Data')
+
+color = 'tab:red'
+
+ax2.set_ylabel('Reynolds Number', color=color)  # we already handled the x-label with ax1
+ax2.plot(flowVelocity, reynolds(flowVelocity), color=color, label='Reynolds Number')
+ax2.tick_params(axis='y', labelcolor=color)
+
+
+
+plt.title("2.26MHz at 10 degrees flow measurements (Real&Imag)")
+fig.tight_layout()  # otherwise the right y-label is slightly clipped
+fig.legend()
 plt.show()
+
+
+
+
+
 
 ##Error Analysis
 slope, intercept, r_value, p_value, std_err = stats.linregress(flowVelocity,BA_Data)
@@ -107,3 +156,4 @@ print("R Squared : %s"%r_value)
 
 print("P Value : %s"%p_value)
 print("Standard Error: %s"%std_err)
+
