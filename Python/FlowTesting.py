@@ -1,10 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import csv
 import nmrglue as ng
 from scipy import optimize
-from scipy.interpolate import *
-from numpy import *
+from numpy import polyval, polyfit
 import math
 import os
 from scipy import stats
@@ -15,9 +13,9 @@ starting_point = 27
 peaks = 4
 OscError = 3 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
 diam_tube = 0.0075 #m
-density_fluid = 1010 #kg/m^3
-viscocity = 0.001028 #of fluid (kg/ms)
-
+density_fluid = 995 #kg/m^3
+viscocity = 0.001054 #of fluid (kg/ms)
+\
 """
 Below, I will create variables that define the slope and flow velocities of the measurements to be
 used after this loop to gather that data in the files.
@@ -41,7 +39,7 @@ def reynolds(flow_Velocity):
      for i in range(0, len(flow_Velocity), 1):
          reynolds_number = density_fluid*flowVelocity[i]*diam_tube/viscocity
          Re.append(reynolds_number)
-         print(reynolds_number)
+         #print(reynolds_number)
          
      return Re
 
@@ -55,7 +53,7 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
         i = 0
         time = 0
         while (i<data.size):
-            magnitudeY.append(math.sqrt((float(data[i].imag))**2+(float(data[i].real))**2))
+            magnitudeY.append(math.sqrt((float(data[i].real))**2+(float(data[i].real))**2))
             i += 1
             time += float(dic["acq_time"]/dic["acq_points"])
             timeX.append(time)
@@ -94,11 +92,11 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
         plt.plot(timeX, magnitudeY, label='data')
         plt.xlabel("Time (sec)")
         plt.ylabel("Magnitude (Arbitrary)")
-        plt.title("Flow Velocity of: %s m/s" % flowFile[5:9])
+        plt.title("Flow Velocity of: %s CCM" % flowFile[5:9])
 
         plt.legend()
         plt.figure(1)
-        #plt.show()
+        plt.show()
 
     else:
         print('File found but not .tnt format')
@@ -126,17 +124,17 @@ ax1.set_ylabel('-B/A', color=color)
 ax1.tick_params(axis='y', labelcolor=color)
 
 ax1.plot(flowVelocity, polyval(p2,flowVelocity), label='Linear fit', color = "black")
-ax1.plot(flowVelocity, BA_Data, color=color, label='Flow Data')
+ax1.plot(flowVelocity, BA_Data, 'bo--', color=color, label='Flow Data')
 
 color = 'tab:red'
 
-ax2.set_ylabel('Reynolds Number', color=color)  # we already handled the x-label with ax1
+ax2.set_ylabel('Reynolds Number', color=color)  # we already handlNed the x-label with ax1
 ax2.plot(flowVelocity, reynolds(flowVelocity), color=color, label='Reynolds Number')
 ax2.tick_params(axis='y', labelcolor=color)
 
 
 
-plt.title("2.26MHz at 10 degrees flow measurements (Real&Imag)")
+plt.title("2.26MHz at 0 degrees flow measurements (Real&Imag)")
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
 fig.legend()
 plt.show()
