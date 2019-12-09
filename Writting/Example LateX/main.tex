@@ -1,0 +1,69 @@
+% Notice that the percentage symbol begins a comment, so you can remove any section by commenting it out
+% For example, if you don't feel the need for a ``Dedication'', put % at the beginning of \include{dedication}
+% Each \include{name} refers to a file called name.tex
+
+\documentclass[12pt]{unbthesis}
+%\usepackage[left=4cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage[subfigure]{tocloft} % no number for Vita in ToC
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{footmisc}
+\usepackage{algorithmic}
+\usepackage{listings}
+\usepackage{fancyvrb}
+\title{Honours Thesis Template}
+\author{Name of Candidate}
+\predegree{Previous Degrees (i.e. Degree, University, Year)\\
+Bachelor of Arts, UNB, 1999}
+\degree{BSc. Honours Physics}
+\gau{Physics}
+\supervisor{name1, department/field}
+\examboard{reader1, department/field,
+\\  & reader2, department/field}
+\externalexam{}
+\date{Month, Year of submission to Graduate School}
+\copyrightyear{Year of graduation}
+\setlength\parindent{0pt}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{notation}{Notation}[section]
+
+\begin{document}
+%\unbtitlepage - this includes an external examiner, probably not worth messing around with
+\maketitle
+\setcounter{secnumdepth}{3} \setcounter{tocdepth}{3}
+\pagenumbering{roman} \setcounter{page}{1}
+\include{dedication}
+\include{abstract}
+\include{acknowledgments}
+%%-----------Table of Contents------------------
+\renewcommand{\contentsname}{Table of Contents}
+\tableofcontents{}
+\addcontentsline{toc}{chapter}{Table of Contents}
+%%------------List of Tables----------------------
+\listoftables{}
+\addcontentsline{toc}{chapter}{List of Tables}
+%%------------List of Figures----------------------
+\listoffigures{}
+\addcontentsline{toc}{chapter}{List of Figures}
+\include{abbreviations}
+%%-------------change single space to double space--------
+\doublespacing \pagenumbering{arabic} \setcounter{page}{1}
+\include{chapter1}
+\include{chapter2}
+\include{chapter3}
+\include{chapter4}
+\include{chapter5}
+%\include{bibliography}
+% changes default name Bibliography to References
+%\renewcommand{\bibname}{References}
+\bibliographystyle{amsplain}
+\bibliography{mybibliography}
+\addcontentsline{toc}{chapter}{Bibliography}
+\include{appendices2}
+\include{glossary}
+\include{vita}
+\end{document}

@@ -7,15 +7,15 @@ import math
 import os
 from scipy import stats
 
-
-
+NewWay = True
+PeakSum = 3
 starting_point = 27
-peaks = 4
+peaks = 6
 OscError = 3 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
 diam_tube = 0.0075 #m
 density_fluid = 995 #kg/m^3
 viscocity = 0.001054 #of fluid (kg/ms)
-\
+
 """
 Below, I will create variables that define the slope and flow velocities of the measurements to be
 used after this loop to gather that data in the files.
@@ -31,7 +31,7 @@ def flowCalc(flow_file):
     area = math.pi*(diam_tube/2)**2
 
     #return (flow_numberCCM/100)
-    return (flow_numberCCM/(100**3*60*math.pi*(diam_tube/2)**2))
+    return (flow_numberCCM/(100**3*60*area))
 
 def reynolds(flow_Velocity):
      Re = []
@@ -44,6 +44,19 @@ def reynolds(flow_Velocity):
      return Re
 
 
+def plotPeaks():
+    total = 0
+    for x in range(0, (PeakSum+1)*2):
+        print("x : ", PeakSum/2)
+        total += magnitudeY[(increment_point*i + starting_point)-int(PeakSum/2)+x]  
+    
+    #print("Peak magnitude of ", magnitudeY[(increment_point*i + starting_point)], " at ", starting_point)
+    InterpolationX.append(timeX[(increment_point*i + starting_point)])
+    InterpolationY.append(total)
+
+
+
+
 for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-Measurements-with-Low-Field/Python"):
     if flowFile.endswith(".tnt"):
         dic,data = ng.tecmag.read(flowFile)
@@ -53,7 +66,7 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
         i = 0
         time = 0
         while (i<data.size):
-            magnitudeY.append(math.sqrt((float(data[i].real))**2+(float(data[i].real))**2))
+            magnitudeY.append(math.sqrt((float(data[i].imag))**2+(float(data[i].real))**2))
             i += 1
             time += float(dic["acq_time"]/dic["acq_points"])
             timeX.append(time)
@@ -65,16 +78,20 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
         InterpolationY = [] 
         for i in range(0, peaks):
             #iff the magnitude of the data is large on either +1 or -1 then use the largest
-            if magnitudeY[(increment_point*i + starting_point)+1] > magnitudeY[(increment_point*i + starting_point)]:
+            if not NewWay:
+                if magnitudeY[(increment_point*i + starting_point)+1] > magnitudeY[(increment_point*i + starting_point)]:
 
-                InterpolationX.append(timeX[(increment_point*i + starting_point)+1])
-                InterpolationY.append(magnitudeY[(increment_point*i + starting_point)+1])
-            elif magnitudeY[(increment_point*i + starting_point)-1] > magnitudeY[(increment_point*i + starting_point)]:
-                InterpolationX.append(timeX[(increment_point*i + starting_point)-1])
-                InterpolationY.append(magnitudeY[(increment_point*i + starting_point)-1])
-            else:  
-                InterpolationX.append(timeX[increment_point*i + starting_point])
-                InterpolationY.append(magnitudeY[increment_point*i + starting_point])
+                    InterpolationX.append(timeX[(increment_point*i + starting_point)+1])
+                    InterpolationY.append(magnitudeY[(increment_point*i + starting_point)+1])
+                elif magnitudeY[(increment_point*i + starting_point)-1] > magnitudeY[(increment_point*i + starting_point)]:
+                    InterpolationX.append(timeX[(increment_point*i + starting_point)-1])
+                    InterpolationY.append(magnitudeY[(increment_point*i + starting_point)-1])
+                else:  
+                    InterpolationX.append(timeX[increment_point*i + starting_point])
+                    InterpolationY.append(magnitudeY[increment_point*i + starting_point])
+            else:
+                plotPeaks()
+
 
         plt.plot(InterpolationX, InterpolationY, label= ("%s peaks data" % peaks))
         p1 = polyfit(InterpolationX,InterpolationY,1)
@@ -96,7 +113,7 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
 
         plt.legend()
         plt.figure(1)
-        plt.show()
+        #plt.show()
 
     else:
         print('File found but not .tnt format')
@@ -134,7 +151,7 @@ ax2.tick_params(axis='y', labelcolor=color)
 
 
 
-plt.title("2.26MHz at 0 degrees flow measurements (Real&Imag)")
+plt.title("2.26MHz at 10 degrees flow measurements | Summing over 3 points")
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
 fig.legend()
 plt.show()
@@ -154,4 +171,4 @@ print("R Squared : %s"%r_value)
 
 print("P Value : %s"%p_value)
 print("Standard Error: %s"%std_err)
-
+print("SLOPE:", slope)
