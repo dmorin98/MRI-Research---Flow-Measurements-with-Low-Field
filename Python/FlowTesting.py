@@ -10,7 +10,7 @@ from scipy import stats
 NewWay = True
 PeakSum = 3
 starting_point = 27
-peaks = 6
+peaks = 3
 OscError = 3 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
 diam_tube = 0.0075 #m
 density_fluid = 995 #kg/m^3
@@ -113,7 +113,7 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
 
         plt.legend()
         plt.figure(1)
-        #plt.show()
+        plt.show()
 
     else:
         print('File found but not .tnt format')
