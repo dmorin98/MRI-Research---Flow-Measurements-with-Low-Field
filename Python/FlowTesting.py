@@ -7,8 +7,8 @@ import math
 import os
 from scipy import stats
 
-NewWay = False
-PeakSum = 1
+NewWay = True
+PeakSum = 3
 starting_point = 27
 peaks = 3
 OscError = 3 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
@@ -35,7 +35,7 @@ def flowCalc(flow_file):
 
 def reynolds(flow_Velocity):
      Re = []
-     print("flowvel = ", flow_Velocity[7])
+    
      for i in range(0, len(flow_Velocity), 1):
          reynolds_number = density_fluid*flowVelocity[i]*diam_tube/viscocity
          Re.append(reynolds_number)
@@ -43,19 +43,15 @@ def reynolds(flow_Velocity):
          
      return Re
 
-
 def plotPeaks():
     total = 0
     for x in range(0, (PeakSum+1)*2):
         print("x : ", PeakSum/2)
         total += magnitudeY[(increment_point*i + starting_point)-int(PeakSum/2)+x]  
     
-    #print("Peak magnitude of ", magnitudeY[(increment_point*i + starting_point)], " at ", starting_point)
+    
     InterpolationX.append(timeX[(increment_point*i + starting_point)])
     InterpolationY.append(total)
-
-
-
 
 for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-Measurements-with-Low-Field/Python"):
     if flowFile.endswith(".tnt"):
@@ -113,7 +109,7 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
 
         plt.legend()
         plt.figure(1)
-        plt.show()
+        #plt.show()
 
     else:
         print('File found but not .tnt format')
@@ -124,17 +120,16 @@ plt.close()
 p2, residuals, _, _, _ = polyfit(flowVelocity,BA_Data,1, full=True)
 
 
-"""
-ax1.errorbar(flowVelocity, BA_Data,
-            xerr=OscErrorCCM,
-            yerr=math.sqrt(residuals/len(BA_Data)),
-            fmt='.k--', label='Actual Data')"""
-
 fig = plt.figure()
 ax1 = fig.add_subplot()
 ax2 = ax1.twinx()
 
 color = 'tab:blue'
+
+"""ax1.errorbar(flowVelocity, BA_Data,
+            xerr=OscErrorCCM,
+            yerr=math.sqrt(residuals/len(BA_Data)),
+            fmt='.k--', label='Actual Data')"""
 
 ax1.set_xlabel('Flow Velocity (m/s)')
 ax1.set_ylabel('-B/A', color=color)
@@ -148,8 +143,6 @@ color = 'tab:red'
 ax2.set_ylabel('Reynolds Number', color=color)  # we already handlNed the x-label with ax1
 ax2.plot(flowVelocity, reynolds(flowVelocity), color=color, label='Reynolds Number')
 ax2.tick_params(axis='y', labelcolor=color)
-
-
 
 plt.title("2.26MHz at 10 degrees flow measurements | Summing over 3 points")
 fig.tight_layout()  # otherwise the right y-label is slightly clipped

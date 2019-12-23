@@ -1,2 +1,4 @@
-    for x in range(0, 1):
-        print("i : ", x)
+ax1.errorbar(flowVelocity, BA_Data,
+            xerr=OscErrorCCM,
+            yerr=math.sqrt(residuals/len(BA_Data)),
+            fmt='.k--', label='Actual Data')
