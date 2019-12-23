@@ -7,8 +7,8 @@ import math
 import os
 from scipy import stats
 
-NewWay = True
-PeakSum = 3
+NewWay = False
+PeakSum = 1
 starting_point = 27
 peaks = 3
 OscError = 3 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
