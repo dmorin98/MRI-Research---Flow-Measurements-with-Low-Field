@@ -7,8 +7,8 @@ import math
 import os
 from scipy import stats
 
-NewWay = True
-PeakSum = 3
+NewWay = False
+PeakSum = 1
 starting_point = 27
 peaks = 3
 OscError = 3 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
@@ -25,13 +25,14 @@ used after this loop to gather that data in the files.
 flowVelocity = [] #Array that stores the flow velocities
 BA_Data = [] #This is the value of B/A (Slope/Intersept)
 OscErrorCCM = 3*15/2
+def getFlowVel(CCM):
+    area = math.pi*(diam_tube/2)**2
+    return (CCM/(100**3*60*area))
 
 def flowCalc(flow_file):
     flow_numberCCM = int(flow_file[5:9])
-    area = math.pi*(diam_tube/2)**2
+    return getFlowVel(flow_numberCCM)
 
-    #return (flow_numberCCM/100)
-    return (flow_numberCCM/(100**3*60*area))
 
 def reynolds(flow_Velocity):
      Re = []
@@ -138,13 +139,15 @@ ax1.tick_params(axis='y', labelcolor=color)
 ax1.plot(flowVelocity, polyval(p2,flowVelocity), label='Linear fit', color = "black")
 ax1.plot(flowVelocity, BA_Data, 'bo--', color=color, label='Flow Data')
 
+ax1.errorbar(flowVelocity, BA_Data, xerr=getFlowVel(OscErrorCCM), fmt='o')
+
 color = 'tab:red'
 
 ax2.set_ylabel('Reynolds Number', color=color)  # we already handlNed the x-label with ax1
 ax2.plot(flowVelocity, reynolds(flowVelocity), color=color, label='Reynolds Number')
 ax2.tick_params(axis='y', labelcolor=color)
 
-plt.title("2.26MHz at 10 degrees flow measurements | Summing over 3 points")
+plt.title("2.26MHz at 0 degrees flow measurements | Summing over 1 point")
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
 fig.legend()
 plt.show()
