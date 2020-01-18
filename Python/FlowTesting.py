@@ -6,15 +6,20 @@ from numpy import polyval, polyfit
 import math
 import os
 from scipy import stats
+from numpy.fft import fft, fftfreq, ifft
 
-NewWay = False
-PeakSum = 1
+PeakSum = 3
 starting_point = 27
 peaks = 3
 OscError = 3 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
 diam_tube = 0.0075 #m
 density_fluid = 995 #kg/m^3
 viscocity = 0.001054 #of fluid (kg/ms)
+
+font = {'family' : 'normal',
+        'weight' : 'normal',
+        'size'   : 15}	
+plt.rc('font', **font)
 
 """
 Below, I will create variables that define the slope and flow velocities of the measurements to be
@@ -40,14 +45,13 @@ def reynolds(flow_Velocity):
      for i in range(0, len(flow_Velocity), 1):
          reynolds_number = density_fluid*flowVelocity[i]*diam_tube/viscocity
          Re.append(reynolds_number)
-         #print(reynolds_number)
+        
          
      return Re
 
 def plotPeaks():
     total = 0
-    for x in range(0, (PeakSum+1)*2):
-        print("x : ", PeakSum/2)
+    for x in range(0, ((PeakSum)*2)-1):
         total += magnitudeY[(increment_point*i + starting_point)-int(PeakSum/2)+x]  
     
     
@@ -74,20 +78,7 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
         InterpolationX = [] 
         InterpolationY = [] 
         for i in range(0, peaks):
-            #iff the magnitude of the data is large on either +1 or -1 then use the largest
-            if not NewWay:
-                if magnitudeY[(increment_point*i + starting_point)+1] > magnitudeY[(increment_point*i + starting_point)]:
-
-                    InterpolationX.append(timeX[(increment_point*i + starting_point)+1])
-                    InterpolationY.append(magnitudeY[(increment_point*i + starting_point)+1])
-                elif magnitudeY[(increment_point*i + starting_point)-1] > magnitudeY[(increment_point*i + starting_point)]:
-                    InterpolationX.append(timeX[(increment_point*i + starting_point)-1])
-                    InterpolationY.append(magnitudeY[(increment_point*i + starting_point)-1])
-                else:  
-                    InterpolationX.append(timeX[increment_point*i + starting_point])
-                    InterpolationY.append(magnitudeY[increment_point*i + starting_point])
-            else:
-                plotPeaks()
+            plotPeaks()
 
 
         plt.plot(InterpolationX, InterpolationY, label= ("%s peaks data" % peaks))
@@ -127,16 +118,11 @@ ax2 = ax1.twinx()
 
 color = 'tab:blue'
 
-"""ax1.errorbar(flowVelocity, BA_Data,
-            xerr=OscErrorCCM,
-            yerr=math.sqrt(residuals/len(BA_Data)),
-            fmt='.k--', label='Actual Data')"""
-
 ax1.set_xlabel('Flow Velocity (m/s)')
 ax1.set_ylabel('-B/A', color=color)
 ax1.tick_params(axis='y', labelcolor=color)
 
-ax1.plot(flowVelocity, polyval(p2,flowVelocity), label='Linear fit', color = "black")
+ax1.plot(flowVelocity, polyval(p2,flowVelocity), label='Linear fit', color = "black", linewidth = 3)
 ax1.plot(flowVelocity, BA_Data, 'bo--', color=color, label='Flow Data')
 
 ax1.errorbar(flowVelocity, BA_Data, xerr=getFlowVel(OscErrorCCM), fmt='o')
@@ -147,15 +133,12 @@ ax2.set_ylabel('Reynolds Number', color=color)  # we already handlNed the x-labe
 ax2.plot(flowVelocity, reynolds(flowVelocity), color=color, label='Reynolds Number')
 ax2.tick_params(axis='y', labelcolor=color)
 
-plt.title("2.26MHz at 0 degrees flow measurements | Summing over 1 point")
+#plt.title("2.26MHz at 0 degrees flow measurements | Summing over 1 point")
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
-fig.legend()
+fig.legend(loc='lower right', bbox_to_anchor=(0.83, 0.15), frameon=False)
 plt.show()
 
-
-
-
-
+#Fourier Transform
 
 ##Error Analysis
 slope, intercept, r_value, p_value, std_err = stats.linregress(flowVelocity,BA_Data)
