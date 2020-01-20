@@ -8,6 +8,7 @@ import os
 from scipy import stats
 from numpy.fft import fft, fftfreq, ifft
 
+Num_File = 3
 PeakSum = 3
 starting_point = 27
 peaks = 3
@@ -108,8 +109,36 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
         continue
 
 plt.close()
+print('Array:', BA_Data)
+#This Section Will Average the three values for BA_DATA
+BA_newData = []
+Val = 0
+newFlow = []
 
-p2, residuals, _, _, _ = polyfit(flowVelocity,BA_Data,1, full=True)
+stand_dev = []
+
+for l in range(0, int(len(BA_Data)/3), 1):
+    total = 0
+    newFlow.append(flowVelocity[l*3])
+    for i in range(0, Num_File, 1):
+        total += BA_Data[Val]
+        Val += 1
+    average = total/Num_File
+    BA_newData.append(average)
+
+    #Standard Deviation
+    sum = (BA_Data[l*3]-average)**2+(BA_Data[l*3+1]-average)**2+(BA_Data[l*3+2]-average)**2
+    stand_dev.append(math.sqrt((1/(Num_File-1))*sum))
+
+
+
+
+flowVelocity = newFlow
+
+#########################
+
+
+p2, residuals, _, _, _ = polyfit(flowVelocity,BA_newData,1, full=True)
 
 
 fig = plt.figure()
@@ -123,10 +152,10 @@ ax1.set_ylabel('-B/A', color=color)
 ax1.tick_params(axis='y', labelcolor=color)
 
 ax1.plot(flowVelocity, polyval(p2,flowVelocity), label='Linear fit', color = "black", linewidth = 3)
-ax1.plot(flowVelocity, BA_Data, 'bo--', color=color, label='Flow Data')
+ax1.plot(flowVelocity, BA_newData, 'bo--', color=color, label='Flow Data')
 
-ax1.errorbar(flowVelocity, BA_Data, xerr=getFlowVel(OscErrorCCM), fmt='o')
-
+ax1.errorbar(flowVelocity, BA_newData, xerr=getFlowVel(OscErrorCCM), fmt='.k')
+ax1.errorbar(flowVelocity, BA_newData, yerr= stand_dev, fmt='.k')
 color = 'tab:red'
 
 ax2.set_ylabel('Reynolds Number', color=color)  # we already handlNed the x-label with ax1
@@ -141,7 +170,7 @@ plt.show()
 #Fourier Transform
 
 ##Error Analysis
-slope, intercept, r_value, p_value, std_err = stats.linregress(flowVelocity,BA_Data)
+slope, intercept, r_value, p_value, std_err = stats.linregress(flowVelocity,BA_newData)
 
 print("______________________________________________________________")
 print("Acq_ time: %s"%dic["acq_time"])
