@@ -9,8 +9,8 @@ from scipy import stats
 from numpy.fft import fft, fftfreq, ifft
 
 Num_File = 3
-PeakSum = 3
-starting_point = 27
+PeakSum = 1
+starting_point = 28
 peaks = 3
 OscError = 3 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
 diam_tube = 0.0075 #m
@@ -102,6 +102,7 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
 
         plt.legend()
         plt.figure(1)
+
         #plt.show()
 
     else:
@@ -109,7 +110,6 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
         continue
 
 plt.close()
-print('Array:', BA_Data)
 #This Section Will Average the three values for BA_DATA
 BA_newData = []
 Val = 0
@@ -129,9 +129,6 @@ for l in range(0, int(len(BA_Data)/3), 1):
     #Standard Deviation
     sum = (BA_Data[l*3]-average)**2+(BA_Data[l*3+1]-average)**2+(BA_Data[l*3+2]-average)**2
     stand_dev.append(math.sqrt((1/(Num_File-1))*sum))
-
-
-
 
 flowVelocity = newFlow
 
