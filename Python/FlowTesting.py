@@ -7,13 +7,11 @@ import math
 import os
 from scipy import stats
 
-phase = True
+phase = False
 Num_File = 1
 PeakSum = 1
 starting_point = 27 #High AMP 27, Low AMP 11
-peaks = 9
-
-
+peaks = 4
 
 
 OscError = 4 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
@@ -63,14 +61,16 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
         dic,data = ng.tecmag.read(flowFile)
 
         magnitudeY = []
+        realY = []
+        imagY = []
         timeX = []
+
         i = 0
         time = 0
         increment_point = int(dic["acq_points"]*2)
         
         if phase == True:
             while (i<data.size):
-                magnitudeY.append(math.sqrt((float(data[i].imag))**2+(float(data[i].real))**2))
                 magnitudeY.append(math.atan2(data[i].imag, data[i].real))
                 
                 i += 1
@@ -82,7 +82,9 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
             for i in range(0, peaks):
                 plotPeaks()
             plt.plot(InterpolationX, InterpolationY, label= ("%s peaks data" % peaks))
+            slope, intercept = polyfit(InterpolationX,InterpolationY,1)
             p1 = polyfit(InterpolationX,InterpolationY,1)
+            print('SLOPE:,', slope)
 
 
 
@@ -90,7 +92,8 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
 
             while (i<data.size):
                 magnitudeY.append(math.sqrt((float(data[i].imag))**2+(float(data[i].real))**2))
-                
+                imagY.append((float(data[i].imag)))
+                realY.append((float(data[i].real)))
                 i += 1
                 time += float(dic["acq_time"]/dic["acq_points"])
                 timeX.append(time)
@@ -119,15 +122,26 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
 
     ########
         if phase == False:
-            plt.plot(timeX, magnitudeY, label='data')
+            plt.subplot(3,1,1)
+            plt.plot(timeX, magnitudeY, label='Magnitude')
+            plt.plot(InterpolationX, InterpolationY, label= ("%s peaks data" % peaks))
+            plt.title("Flow Velocity of: %s CCM" % flowFile[5:9])
+            plt.legend()
+            plt.subplot(3,1,2)
+            plt.plot(timeX, realY, label='Real')
+            plt.legend()
+            plt.subplot(3,1,3)
+            plt.plot(timeX, imagY, label='Imag')
+            plt.legend()
+
         plt.xlabel("Time (sec)")
         plt.ylabel("Magnitude (Arbitrary)")
-        plt.title("Flow Velocity of: %s CCM" % flowFile[5:9])
+        if phase == True:
+            plt.ylim((-math.pi), (math.pi))
 
-        plt.legend()
-        plt.figure(1)
+        
 
-        #plt.show()
+        plt.show()
 
 
     else:
