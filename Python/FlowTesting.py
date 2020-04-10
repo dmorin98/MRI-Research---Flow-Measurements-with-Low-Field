@@ -8,16 +8,18 @@ import os
 from scipy import stats
 
 phase = False
-Num_File = 1
+plotShow = False
+Num_File = 3
 PeakSum = 1
-starting_point = 27 #High AMP 27, Low AMP 11
-peaks = 4
+starting_point = 28 #High AMP 27, Low AMP 11
+
+peaks = 3
 
 
 OscError = 4 #+/- Hz uncertainty on the oscilliscope for measuring flow velocity
 diam_tube = 0.0075 #m
-density_fluid = 995 #kg/m^3
-viscocity = 0.001054 #of fluid (kg/ms)
+density_fluid = 988 #kg/m^3
+viscocity = 0.001019 #of fluid (kg/ms)
 
 font = {'family' : 'normal',
         'weight' : 'normal',
@@ -109,7 +111,7 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
 
             plt.plot(InterpolationX, InterpolationY, label= ("%s peaks data" % peaks))
             p1 = polyfit(InterpolationX,InterpolationY,1)
-
+            
 
         #Adding Params into FlowVel and BA_Data
         flowVelocity.append(flowCalc(flowFile)) #Creating the flowVelocity array
@@ -126,6 +128,8 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
             plt.plot(timeX, magnitudeY, label='Magnitude')
             plt.plot(InterpolationX, InterpolationY, label= ("%s peaks data" % peaks))
             plt.title("Flow Velocity of: %s CCM" % flowFile[5:9])
+            #plt.ylim(0,2000000)
+            plt.xlim(0,0.002)
             plt.legend()
             plt.subplot(3,1,2)
             plt.plot(timeX, realY, label='Real')
@@ -140,8 +144,8 @@ for flowFile in os.listdir("C:/Users/Devin/Documents/GitHub/MRI-Research---Flow-
             plt.ylim((-math.pi), (math.pi))
 
         
-
-        plt.show()
+        if plotShow == True:
+            plt.show()
 
 
     else:
@@ -200,11 +204,7 @@ if Num_File > 1:
     
 color = 'tab:red'
 ###Extrapolating Reynolds
-
-
 flowVelocity.insert(0, 0)
-print('LEN OF X:', len(flowVelocity))
-print('LEN OF Y:', len(reynolds(flowVelocity)))
 ax2.set_ylabel('Reynolds Number', color=color)  # we already handlNed the x-label with ax1
 ax2.plot(flowVelocity, reynolds(flowVelocity), color=color, label='Reynolds Number', linestyle='-.', linewidth = 3)
 ax2.tick_params(axis='y', labelcolor=color)
@@ -217,15 +217,12 @@ plt.show()
 #Fourier Transform
 
 ##Error Analysis
-print(flowVelocity)
-print(BA_newData)
-slope, intercept, r_value, p_value, std_err = stats.linregress(flowVelocity, BA_newData)
+slope, intercept, r_value, p_value, std_err = stats.linregress(flowVelocity, polyval(p2,flowVelocity))
+del flowVelocity[0]
+slope2, intercept2, r_value2, p_value2, std_err2 = stats.linregress(flowVelocity, BA_newData)
 
-print("______________________________________________________________")
-print("Acq_ time: %s"%dic["acq_time"])
-print("Acq_ Points: %s"%dic["acq_points"])
-print("R Squared : %s"%r_value)
+print("Slope:", slope)
+print("Intercept:", intercept)
+print("R:", r_value2)
 
-print("P Value : %s"%p_value)
-print("Standard Error: %s"%std_err)
-print("SLOPE:", slope)
+
